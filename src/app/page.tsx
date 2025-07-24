@@ -1,103 +1,118 @@
-import Image from "next/image";
+'use client';
+
+import Button from '@/components/Button';
+import Card from '@/components/Card';
+import Fieldset from '@/components/Fieldset';
+import Input from '@/components/Input';
+import SortDropdown from '@/components/SortDropdown';
+import { JackettApi, Movie } from '@/services/JackettService';
+import { Search } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  let api = new JackettApi();
+  let [searchQuery, setSearchQuery] = useState('');
+  let [searchResults, setSearchResults]: [Movie[], any] = useState([]);
+  let [originalResults, setOriginalResults] = useState<Movie[]>([]);
+  let [loading, setLoading] = useState(false);
+  let [sortOption, setSortOption] = useState<'none' | 'peers' | 'seeders' | 'best'>('none');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const handleSearch = async () => {
+    if (searchQuery.trim() === '') {
+      setSearchResults([]);
+      setOriginalResults([]);
+      setSortOption('none');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const data = await api.searchInJackett(searchQuery);
+
+      setOriginalResults(data.Results);
+      applySorting(data.Results, sortOption);
+    } catch (error) {
+      console.error('Erro na busca:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applySorting = (results: Movie[], option: 'none' | 'peers' | 'seeders' | 'best') => {
+    let sortedResults = [...results];
+
+    if (option === 'peers') {
+      sortedResults.sort((a, b) => b.Peers - a.Peers);
+    } else if (option === 'seeders') {
+      sortedResults.sort((a, b) => b.Seeders - a.Seeders);
+    } else if (option === 'best') {
+      sortedResults.sort((a, b) => {
+        const scoreA = a.Peers * 0.6 + a.Seeders * 0.4;
+        const scoreB = b.Peers * 0.6 + b.Seeders * 0.4;
+        return scoreB - scoreA;
+      });
+    }
+
+    setSearchResults(sortedResults);
+  };
+
+  const handleSortOption = (option: 'none' | 'peers' | 'seeders' | 'best') => {
+    setSortOption(option);
+
+    if (originalResults.length > 0) {
+      applySorting(originalResults, option);
+    }
+  };
+
+  return (
+    <main className='flex flex-col items-center justify-baseline'>
+      <section className='w-full p-4 flex flex-col justify-center items-center'>
+        <Fieldset
+          type='join'
+          legend={
+            <>
+              <Search /> <span>Pesquisar</span>
+            </>
+          }
+        >
+          <Input
+            placeholder='Digite um filme...'
+            className='join-item input-neutral'
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+          <Button
+            className='join-item btn-primary btn-soft'
+            onClick={handleSearch}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            Pesquisar
+          </Button>
+        </Fieldset>
+
+        <SortDropdown
+          sortOption={sortOption}
+          onSortChange={handleSortOption}
+        />
+      </section>
+
+      <section className='card flex-row justify-center m-10 p-6 flex-wrap gap-4'>
+        {loading ? (
+          <span className='loading loading-ring loading-xl'></span>
+        ) : (
+          searchResults.map((result, index) => (
+            <Card
+              key={index}
+              title={result.Title}
+              seeders={result.Seeders}
+              peers={result.Peers}
+              buttonText='Baixar'
+              link={result.MagnetUri || result.Link}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          ))
+        )}
+      </section>
+    </main>
   );
 }
