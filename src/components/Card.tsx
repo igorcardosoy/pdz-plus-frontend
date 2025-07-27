@@ -3,13 +3,14 @@ interface CardProps {
   description?: string;
   seeders?: number;
   peers?: number;
-  buttonText?: string;
+  buttonText?: React.ReactNode;
   category?: string;
   categories?: string[];
+  tracker?: string;
   link?: string;
 }
 
-const Card = ({ title, description, seeders, peers, buttonText, link, category, categories }: CardProps) => {
+const Card = ({ title, description, seeders, peers, buttonText, link, category, categories, tracker }: CardProps) => {
   let seedLevels = [
     { label: 'Muito Baixo', value: 0, className: 'badge badge-soft badge-info' },
     { label: 'Baixo', value: 1, className: 'badge badge-soft badge-info' },
@@ -53,7 +54,9 @@ const Card = ({ title, description, seeders, peers, buttonText, link, category, 
         )}
 
         {description && <p>{description}</p>}
-        <div className='card-actions justify-end'>
+        <div className='card-actions items-baseline justify-between'>
+          {tracker && <div className='text-xs text-gray-500 mt-2 w-fit'>{tracker}</div>}
+
           <a
             href={link}
             target='_blank'

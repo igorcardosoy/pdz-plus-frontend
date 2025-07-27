@@ -1,4 +1,14 @@
+'use client';
+
+import { authService } from '@/services/AuthService';
+import { redirect } from 'next/navigation';
+
 const Navbar = () => {
+  const handleLogout = () => {
+    authService.logout();
+    redirect('/login');
+  };
+
   return (
     <div className='navbar bg-base-200 shadow-sm'>
       <div className='navbar-start'>
@@ -62,7 +72,7 @@ const Navbar = () => {
             className='menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 p-2 shadow'
           >
             <li>
-              <a>Logout</a>
+              <a onClick={handleLogout}>Logout</a>
             </li>
           </ul>
         </div>
