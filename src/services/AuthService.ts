@@ -15,7 +15,7 @@ class AuthService {
   constructor() {
     this.user = null;
     this.axios = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_PDZ_API_URL + '/pdz-api',
+      baseURL: process.env.NEXT_PUBLIC_PDZ_API_URL,
     });
 
     this.initializeToken();
