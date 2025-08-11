@@ -1,12 +1,37 @@
 'use client';
 
 import { authService } from '@/services/AuthService';
+import { UserProfile, userService } from '@/services/UserService';
 import { redirect } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const Navbar = () => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const userProfile = await userService.getUserProfile();
+        setUser(userProfile);
+
+        const pictureUrl = await userService.getProfilePictureUrl();
+        setProfilePictureUrl(pictureUrl);
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
   const handleLogout = () => {
     authService.logout();
     redirect('/login');
+  };
+
+  const handleHomeClick = () => {
+    window.location.href = '/home';
   };
 
   return (
@@ -39,42 +64,50 @@ const Navbar = () => {
             className='menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow'
           >
             <li>
-              <a>Homepage</a>
-            </li>
-            <li>
-              <a>Portfolio</a>
-            </li>
-            <li>
-              <a>About</a>
+              <a>Nada por aqui no momento</a>
             </li>
           </ul>
         </div>
       </div>
       <div className='navbar-center'>
-        <a className='btn-ghost text-xl'>PDZ+</a>
+        <a
+          onClick={() => {
+            handleHomeClick();
+          }}
+          className='btn btn-ghost text-3xl'
+        >
+          PDZ+
+        </a>
       </div>
       <div className='navbar-end'>
-        <div className='dropdown dropdown-end mr-3'>
-          <div
-            tabIndex={0}
-            role='button'
-            className='btn btn-ghost btn-circle avatar'
-          >
-            <div className='w-10 rounded-full'>
-              <img
-                alt='Tailwind CSS Navbar component'
-                src='https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp'
-              />
+        <div
+          role='button'
+          className='dropdown dropdown-end mr-3 flex items-center gap-3 btn'
+          tabIndex={0}
+        >
+          <div className=''>
+            <div className='avatar'>
+              <div className='w-10 rounded-full'>
+                <img
+                  alt='Profile picture'
+                  src={profilePictureUrl || 'https://www.gravatar.com/avatar/'}
+                />
+              </div>
             </div>
+            <ul
+              tabIndex={0}
+              className='menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 p-2 shadow'
+            >
+              <li>
+                <a onClick={handleLogout}>Logout</a>
+              </li>
+            </ul>
           </div>
-          <ul
-            tabIndex={0}
-            className='menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 p-2 shadow'
-          >
-            <li>
-              <a onClick={handleLogout}>Logout</a>
-            </li>
-          </ul>
+          {user && (
+            <div className='navbar-user'>
+              <span className='font-bold'>{user.username}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

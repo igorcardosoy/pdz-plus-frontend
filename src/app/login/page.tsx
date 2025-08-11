@@ -1,6 +1,9 @@
 'use client';
 
+import Button from '@/components/Button';
+import Input from '@/components/Input';
 import { useAuth } from '@/hooks/useAuth';
+import { Lock, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -36,47 +39,39 @@ const Login = () => {
     <div className='min-h-screen flex items-center justify-center bg-base-200'>
       <div className='card w-96 bg-base-100 shadow-xl'>
         <div className='card-body'>
-          <h2 className='card-title justify-center'>PDZ+ Login</h2>
+          <h2 className='card-title justify-center m-6'>PDZ+</h2>
           {error && (
-            <div className='alert alert-error'>
+            <div className='alert alert-error max-w-70 self-center mb-2'>
               <span>{error}</span>
             </div>
           )}
           <form onSubmit={handleLogin}>
-            <div className='form-control w-full max-w-xs'>
-              <label className='label'>
-                <span className='label-text'>Usuário</span>
-              </label>
-              <input
-                type='text'
+            <div className='flex flex-col gap-4'>
+              <Input
                 placeholder='Digite seu usuário'
-                className='input input-bordered w-full max-w-xs'
                 value={credentials.username}
                 onChange={e => setCredentials({ ...credentials, username: e.target.value })}
                 disabled={isLoading}
+                icon={<User />}
               />
-            </div>
-            <div className='form-control w-full max-w-xs'>
-              <label className='label'>
-                <span className='label-text'>Senha</span>
-              </label>
-              <input
-                type='password'
+              <Input
                 placeholder='Digite sua senha'
-                className='input input-bordered w-full max-w-xs'
+                type='password'
                 value={credentials.password}
                 onChange={e => setCredentials({ ...credentials, password: e.target.value })}
                 disabled={isLoading}
+                icon={<Lock />}
               />
             </div>
+
             <div className='card-actions justify-end mt-4'>
-              <button
+              <Button
                 type='submit'
                 className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
                 disabled={isLoading}
               >
                 {isLoading ? 'Entrando...' : 'Entrar'}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
