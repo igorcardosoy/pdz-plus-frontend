@@ -17,11 +17,20 @@ export default function Home() {
   let [searchResults, setSearchResults]: [Movie[], any] = useState([]);
   let [originalResults, setOriginalResults] = useState<Movie[]>([]);
   let [loading, setLoading] = useState(false);
-  let [sortOption, setSortOption] = useState<'none' | 'peers' | 'seeders' | 'best'>('best');
+  let [sortOption, setSortOption] = useState<'none' | 'peers' | 'seeders' | 'best'>('none');
 
   useEffect(() => {
     requireAuth();
   }, [isAuthenticated, isLoading]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSortOption = localStorage.getItem('sortOption') as 'none' | 'peers' | 'seeders' | 'best' | null;
+      if (savedSortOption) {
+        setSortOption(savedSortOption);
+      }
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -39,7 +48,6 @@ export default function Home() {
     if (searchQuery.trim() === '') {
       setSearchResults([]);
       setOriginalResults([]);
-      setSortOption('best');
       setLoading(false);
       return;
     }
@@ -79,6 +87,10 @@ export default function Home() {
   const handleSortOption = (option: 'none' | 'peers' | 'seeders' | 'best') => {
     setSortOption(option);
 
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sortOption', option);
+    }
+
     if (originalResults.length > 0) {
       applySorting(originalResults, option);
     }
@@ -86,7 +98,7 @@ export default function Home() {
 
   return (
     <main className='flex flex-col items-center justify-baseline'>
-      <section className='w-full p-4 flex flex-col justify-center items-center'>
+      <section className='w-full p-4 pt-10 flex flex-col justify-center items-center'>
         <p className='text-md mb-6 text-center'>
           Aqui você pode pesquisar <span className='font-semibold'>filmes</span> e{' '}
           <span className='font-semibold'>séries</span> (talvez outras mídias também), e baixar torrents de forma rápida
@@ -95,6 +107,7 @@ export default function Home() {
 
         <Fieldset
           type='join'
+          className='max-w-70 md:max-w-full'
           legend={
             <>
               <Search /> <span>Pesquisar</span>
@@ -113,7 +126,7 @@ export default function Home() {
             }}
           />
           <Button
-            className='join-item btn-primary btn-soft'
+            className='join-item btn-primary'
             onClick={handleSearch}
           >
             Pesquisar
@@ -122,6 +135,7 @@ export default function Home() {
 
         <SortDropdown
           sortOption={sortOption}
+          text='Ordenar por'
           onSortChange={handleSortOption}
         />
       </section>

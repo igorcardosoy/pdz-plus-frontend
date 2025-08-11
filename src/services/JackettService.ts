@@ -42,33 +42,25 @@ export class JackettApi {
 
   constructor() {
     this.axios = axios.create({
-      baseURL: process.env.JACKETT_API_URL,
+      baseURL: process.env.NEXT_PUBLIC_JACKETT_API_URL,
     });
   }
 
   async searchInJackett(query: string, limit: number = 10): Promise<SearchResponse> {
     try {
-      if (!process.env.JACKETT_API_URL || !process.env.JACKETT_API_KEY) {
-        throw new Error('Jackett API configuration is missing');
+      const response = await fetch(`/api/jackett/search?query=${encodeURIComponent(query)}&limit=${limit}`);
+      if (!response.ok) {
+        throw new Error('Erro ao buscar no Jackett');
       }
-
-      const response = await this.axios.get('/api/v2.0/indexers/all/results', {
-        params: {
-          query: query,
-          limit: limit,
-          apikey: process.env.JACKETT_API_KEY,
-        },
-      });
-
-      const filteredResults = response.data.Results.filter((result: Movie) => {
+      const data = await response.json();
+      const filteredResults = data.Results.filter((result: Movie) => {
         if (result.Category.some((cat: string | number) => excludedCategories.includes(cat.toString()))) {
           return false;
         }
         return true;
       });
-
       return {
-        ...response.data,
+        ...data,
         Results: filteredResults,
       };
     } catch (error) {

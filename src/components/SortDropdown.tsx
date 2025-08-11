@@ -1,24 +1,25 @@
 interface SortDropdownProps {
   sortOption: 'none' | 'peers' | 'seeders' | 'best';
+  text: string;
   onSortChange: (option: 'none' | 'peers' | 'seeders' | 'best') => void;
 }
 
-const SortDropdown = ({ sortOption, onSortChange }: SortDropdownProps) => {
+const SortDropdown = ({ sortOption, text, onSortChange }: SortDropdownProps) => {
   return (
     <div className='flex items-center justify-center mt-4 gap-2'>
-      <p>
-        <span className='font-bold'>Ordenar por:</span>
+      <p className='text-center'>
+        <span className='font-bold'>{text}</span>
       </p>
-      <div className='dropdown'>
+      <div className='dropdown dropdown-end'>
         <div
           tabIndex={0}
           role='button'
           className='btn btn-sm m-1'
         >
-          {sortOption === 'none' && 'Sem ordenação'}
+          {sortOption === 'none' && 'Por nome'}
           {sortOption === 'peers' && 'Peers ↓'}
           {sortOption === 'seeders' && 'Seeders ↓'}
-          {sortOption === 'best' && '⭐ Combinado'}
+          {sortOption === 'best' && '⭐ Combinado (com base em seeders e peers)'}
         </div>
         <ul
           tabIndex={0}
@@ -29,7 +30,7 @@ const SortDropdown = ({ sortOption, onSortChange }: SortDropdownProps) => {
               onClick={() => onSortChange('none')}
               className={sortOption === 'none' ? 'active' : ''}
             >
-              Sem ordenação
+              Por nome (Proximidade com o título)
             </a>
           </li>
           <li>
@@ -53,7 +54,7 @@ const SortDropdown = ({ sortOption, onSortChange }: SortDropdownProps) => {
               onClick={() => onSortChange('best')}
               className={sortOption === 'best' ? 'active' : ''}
             >
-              ⭐ Melhor opção (combinado)
+              ⭐ Melhor opção (combinado com base em seeders e peers)
             </a>
           </li>
         </ul>

@@ -61,7 +61,7 @@ const Card = ({ title, description, seeders, peers, buttonText, link, category, 
             href={link}
             target='_blank'
           >
-            <button className='btn btn-primary btn-soft'>{buttonText}</button>
+            <button className='btn btn-primary'>{buttonText}</button>
           </a>
         </div>
       </div>

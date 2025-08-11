@@ -9,7 +9,7 @@ interface FieldsetProps extends React.HTMLAttributes<HTMLFieldSetElement> {
 const Fieldset = ({ ...props }: FieldsetProps) => {
   return (
     <>
-      <fieldset className='fieldset bg-base-200 rounded-box w-xs p-4'>
+      <fieldset className={`fieldset bg-base-200 rounded-box w-xs p-4 ${props.className}`}>
         <legend className='fieldset-legend'>{props.legend}</legend>
         <div className={props.type ? 'join' : 'flex'}>{props.children}</div>
       </fieldset>
