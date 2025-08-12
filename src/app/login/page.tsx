@@ -70,7 +70,7 @@ const Login = () => {
               <Button
                 type='button'
                 onClick={() => {
-                  authService.loginWithCallback('http://localhost:3000/callback');
+                  authService.loginWithCallback('https://pdz-plus.localto.net/callback');
                 }}
               >
                 <Image
