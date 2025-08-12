@@ -142,7 +142,7 @@ export default function Home() {
       <section className='card flex-row justify-center m-10 p-6 flex-wrap gap-4'>
         {loading ? (
           <div className='flex flex-col items-center'>
-            <p className='mb-6'>Infelizmente o tempo de procura pode demorar um tempo, então tenha paciência.</p>
+            <p className='mb-6'>Infelizmente o tempo de procura pode demorar um pouco, então tenha paciência.</p>
             <span className='loading loading-ring loading-xl'></span>
           </div>
         ) : (

@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'PDZ+',
-  description: 'A simple movie search app',
+  description: 'Uma plataforma para busca e download de torrents de filmes e séries, para PDZ.',
 };
 
 export default function RootLayout({
