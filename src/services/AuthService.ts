@@ -90,7 +90,7 @@ class AuthService {
 
   loginWithCallback(callbackUrl: string) {
     const encodedCallback = encodeURIComponent(callbackUrl);
-    window.location.href = `${process.env.NEXT_PUBLIC_PDZ_API_URL}/pdz-api/auth/signin/discord?callback=${callbackUrl}`;
+    window.location.href = `${process.env.NEXT_PUBLIC_PDZ_API_URL}/pdz-api/auth/signin/discord?callback=${encodedCallback}`;
   }
 }
 
