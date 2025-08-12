@@ -1,9 +1,9 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
-const CallbackPage = () => {
+const CallbackContent = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const router = useRouter();
@@ -90,6 +90,26 @@ const CallbackPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const LoadingFallback = () => (
+  <div className='min-h-screen flex items-center justify-center bg-base-200'>
+    <div className='card w-96 bg-base-100 shadow-xl'>
+      <div className='card-body text-center'>
+        <div className='loading loading-spinner loading-lg mx-auto'></div>
+        <h2 className='card-title justify-center mt-4'>Carregando...</h2>
+        <p>Aguarde um momento.</p>
+      </div>
+    </div>
+  </div>
+);
+
+const CallbackPage = () => {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CallbackContent />
+    </Suspense>
   );
 };
 
