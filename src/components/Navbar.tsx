@@ -9,6 +9,14 @@ const Navbar = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
+  const getPlaceholderImage = (username?: string) => {
+    if (username) {
+      const hash = btoa(username.toLowerCase()).slice(0, 32);
+      return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=40`;
+    }
+    return 'https://www.gravatar.com/avatar/?d=mp&s=40';
+  };
+
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -16,6 +24,7 @@ const Navbar = () => {
         setUser(userProfile);
 
         const pictureUrl = await userService.getProfilePictureUrl();
+        console.log('Profile picture URL received:', pictureUrl);
         setProfilePictureUrl(pictureUrl);
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -82,7 +91,7 @@ const Navbar = () => {
       <div className='navbar-end'>
         <div
           role='button'
-          className='dropdown dropdown-end mr-3 flex items-center gap-3 btn'
+          className='dropdown dropdown-start mr-3 flex items-center gap-3 btn p-0'
           tabIndex={0}
         >
           <div className=''>
@@ -90,7 +99,13 @@ const Navbar = () => {
               <div className='w-10 rounded-full'>
                 <img
                   alt='Profile picture'
-                  src={profilePictureUrl || 'https://www.gravatar.com/avatar/'}
+                  src={profilePictureUrl || getPlaceholderImage(user?.username)}
+                  onError={e => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== getPlaceholderImage(user?.username)) {
+                      target.src = getPlaceholderImage(user?.username);
+                    }
+                  }}
                 />
               </div>
             </div>

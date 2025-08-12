@@ -101,8 +101,7 @@ export default function Home() {
       <section className='w-full p-4 pt-10 flex flex-col justify-center items-center'>
         <p className='text-md mb-6 text-center'>
           Aqui você pode pesquisar <span className='font-semibold'>filmes</span> e{' '}
-          <span className='font-semibold'>séries</span> (talvez outras mídias também), e baixar torrents de forma rápida
-          e fácil.
+          <span className='font-semibold'>séries</span> (talvez outras mídias também), e baixar torrents de forma fácil.
         </p>
 
         <Fieldset
@@ -142,7 +141,10 @@ export default function Home() {
 
       <section className='card flex-row justify-center m-10 p-6 flex-wrap gap-4'>
         {loading ? (
-          <span className='loading loading-ring loading-xl'></span>
+          <div className='flex flex-col items-center'>
+            <p className='mb-6'>Infelizmente o tempo de procura pode demorar um tempo, então tenha paciência.</p>
+            <span className='loading loading-ring loading-xl'></span>
+          </div>
         ) : (
           searchResults.map((result, index) => (
             <Card

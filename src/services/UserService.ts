@@ -15,7 +15,7 @@ class UserService {
 
   constructor() {
     this.axios = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_PDZ_API_URL,
+      baseURL: `${process.env.NEXT_PUBLIC_PDZ_API_URL}/pdz-api`,
     });
   }
 
@@ -47,25 +47,49 @@ class UserService {
         responseType: 'blob',
       });
 
-      if (response.data) {
+      if (response.data && response.data instanceof Blob && response.data.size > 0) {
         return response.data;
       }
       return null;
     } catch (error) {
-      console.error('Error fetching profile picture:', error);
+      console.error('Error fetching profile picture blob:', error);
       return null;
     }
   }
 
   async getProfilePictureUrl(): Promise<string | null> {
     try {
-      const blob = await this.getProfilePicture();
-      if (blob) {
-        return URL.createObjectURL(blob);
+      // Primeiro tenta obter como URL/string
+      try {
+        const response = await this.axios.get('/users/profile-picture', {
+          headers: this.getAuthHeaders(),
+        });
+
+        // Se retornar uma string (URL), usa diretamente
+        if (response.data && typeof response.data === 'string' && response.data.startsWith('http')) {
+          return response.data;
+        }
+      } catch (urlError) {
+        console.log('Profile picture not available as URL, trying as blob...');
       }
+
+      // Se não conseguiu como URL, tenta como blob
+      try {
+        const blobResponse = await this.axios.get('/users/profile-picture', {
+          headers: this.getAuthHeaders(),
+          responseType: 'blob',
+        });
+
+        if (blobResponse.data && blobResponse.data instanceof Blob && blobResponse.data.size > 0) {
+          return URL.createObjectURL(blobResponse.data);
+        }
+      } catch (blobError) {
+        console.log('Profile picture not available as blob either');
+      }
+
       return null;
     } catch (error) {
-      console.error('Error creating profile picture URL:', error);
+      console.error('Error getting profile picture URL:', error);
       return null;
     }
   }

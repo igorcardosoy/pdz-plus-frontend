@@ -48,11 +48,19 @@ export class JackettApi {
 
   async searchInJackett(query: string, limit: number = 10): Promise<SearchResponse> {
     try {
-      const response = await fetch(`/api/jackett/search?query=${encodeURIComponent(query)}&limit=${limit}`);
-      if (!response.ok) {
-        throw new Error('Erro ao buscar no Jackett');
+      const apikey = process.env.NEXT_PUBLIC_JACKETT_API_KEY;
+      if (!apikey) {
+        throw new Error('Jackett API key não configurada');
       }
-      const data = await response.json();
+
+      const response = await this.axios.get(`/api/v2.0/indexers/all/results`, {
+        params: {
+          query: query,
+          limit: limit,
+          apikey: apikey,
+        },
+      });
+      const data = response.data;
       const filteredResults = data.Results.filter((result: Movie) => {
         if (result.Category.some((cat: string | number) => excludedCategories.includes(cat.toString()))) {
           return false;

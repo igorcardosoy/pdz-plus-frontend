@@ -3,7 +3,9 @@
 import Button from '@/components/Button';
 import Input from '@/components/Input';
 import { useAuth } from '@/hooks/useAuth';
+import { authService } from '@/services/AuthService';
 import { Lock, User } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -65,6 +67,20 @@ const Login = () => {
             </div>
 
             <div className='card-actions justify-end mt-4'>
+              <Button
+                type='button'
+                onClick={() => {
+                  authService.loginWithCallback('http://localhost:3000/callback');
+                }}
+              >
+                <Image
+                  src='/discord-icon.svg'
+                  alt='Discord Logo'
+                  width={20}
+                  height={20}
+                />
+                Entrar com Discord
+              </Button>
               <Button
                 type='submit'
                 className={`btn btn-primary ${isLoading ? 'loading' : ''}`}

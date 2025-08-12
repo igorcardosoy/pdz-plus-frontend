@@ -15,7 +15,7 @@ class AuthService {
   constructor() {
     this.user = null;
     this.axios = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_PDZ_API_URL,
+      baseURL: `${process.env.NEXT_PUBLIC_PDZ_API_URL}/pdz-api`,
     });
 
     this.initializeToken();
@@ -79,7 +79,6 @@ class AuthService {
   }
 
   getToken(): string | null {
-    // Se cookie for HttpOnly não será acessível aqui; mantemos tentativa apenas se não for HttpOnly
     if (typeof window === 'undefined') return null;
     const match = document.cookie.match(/(?:^|; )jwt=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : null;
@@ -87,6 +86,11 @@ class AuthService {
 
   isLoggedIn(): boolean {
     return this.getToken() !== null;
+  }
+
+  loginWithCallback(callbackUrl: string) {
+    const encodedCallback = encodeURIComponent(callbackUrl);
+    window.location.href = `${process.env.NEXT_PUBLIC_PDZ_API_URL}/pdz-api/auth/signin/discord?callback=${callbackUrl}`;
   }
 }
 

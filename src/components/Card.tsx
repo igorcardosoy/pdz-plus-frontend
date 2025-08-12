@@ -30,7 +30,7 @@ const Card = ({ title, description, seeders, peers, buttonText, link, category, 
   }
 
   return (
-    <div className={`card bg-base-200 shadow-sm h-56 w-92`}>
+    <div className={`card bg-base-200 shadow-sm h-56 md:w-92 w-60`}>
       <div className='card-body justify-between'>
         <h2 className='card-title line-clamp-2 overflow-hidden text-ellipsis break-words'>{title}</h2>
         <div className='card-actions'>
