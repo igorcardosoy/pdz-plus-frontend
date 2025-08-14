@@ -139,7 +139,7 @@ export default function Home() {
         />
       </section>
 
-      {searchResults.length > 0 && (
+      {searchResults.length > 0 && !loading && (
         <div className='w-full flex justify-between items-center ml-20 mt-10'>
           <div className='text-sm text-gray-500'>Encontrados: {searchResults.length}</div>
         </div>
