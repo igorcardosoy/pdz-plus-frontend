@@ -134,33 +134,43 @@ export default function Home() {
 
         <SortDropdown
           sortOption={sortOption}
-          text='Ordenar por'
+          text='Ordenação:'
           onSortChange={handleSortOption}
         />
       </section>
 
-      <section className='card flex-row justify-center m-10 p-6 flex-wrap gap-4'>
+      {searchResults.length > 0 && (
+        <div className='w-full flex justify-between items-center ml-20 mt-10'>
+          <div className='text-sm text-gray-500'>Encontrados: {searchResults.length}</div>
+        </div>
+      )}
+
+      <section className='card flex-row justify-center m-10 mt-4 p-6 flex-wrap gap-4'>
         {loading ? (
-          <div className='flex flex-col items-center'>
-            <p className='mb-6'>Infelizmente o tempo de procura pode demorar um pouco, então tenha paciência.</p>
+          <div className='flex flex-col items-center animate-pulse'>
+            <p className='mb-6 italic text-gray-500'>
+              Infelizmente o tempo de procura pode demorar um pouco, então tenha paciência.
+            </p>
             <span className='loading loading-ring loading-xl'></span>
           </div>
         ) : (
-          searchResults.map((result, index) => (
-            <Card
-              key={index}
-              title={result.Title}
-              seeders={result.Seeders}
-              peers={result.Peers}
-              buttonText={
-                <>
-                  <Magnet width={16} /> Baixar
-                </>
-              }
-              tracker={result.Tracker}
-              link={result.MagnetUri || result.Link}
-            />
-          ))
+          <>
+            {searchResults.map((result, index) => (
+              <Card
+                key={index}
+                title={result.Title}
+                seeders={result.Seeders}
+                peers={result.Peers}
+                buttonText={
+                  <>
+                    <Magnet width={16} /> Baixar
+                  </>
+                }
+                tracker={result.Tracker}
+                link={result.MagnetUri || result.Link}
+              />
+            ))}
+          </>
         )}
       </section>
     </main>
