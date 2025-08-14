@@ -24,7 +24,6 @@ const Navbar = () => {
         setUser(userProfile);
 
         const pictureUrl = await userService.getProfilePictureUrl();
-        console.log('Profile picture URL received:', pictureUrl);
         setProfilePictureUrl(pictureUrl);
       } catch (error) {
         console.error('Error loading user data:', error);

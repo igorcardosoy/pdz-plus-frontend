@@ -2,37 +2,38 @@
 
 import Button from '@/components/Button';
 import Card from '@/components/Card';
+import Dropdown from '@/components/Dropdown';
 import Fieldset from '@/components/Fieldset';
 import Input from '@/components/Input';
-import SortDropdown from '@/components/SortDropdown';
+import Option, { DropdownOption } from '@/components/Option';
 import { useAuth } from '@/hooks/useAuth';
 import { JackettApi, Movie } from '@/services/JackettService';
 import { Magnet, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
-  const { isAuthenticated, isLoading, requireAuth } = useAuth();
+  const { isAuthenticated, isLoading: isLoadingAuth, requireAuth } = useAuth();
   let api = new JackettApi();
   let [searchQuery, setSearchQuery] = useState('');
   let [searchResults, setSearchResults]: [Movie[], any] = useState([]);
   let [originalResults, setOriginalResults] = useState<Movie[]>([]);
-  let [loading, setLoading] = useState(false);
-  let [sortOption, setSortOption] = useState<'none' | 'peers' | 'seeders' | 'best'>('none');
+  let [isLoading, setIsLoading] = useState(false);
+  let [sortOption, setSortOption] = useState<DropdownOption['value']>('none');
 
   useEffect(() => {
     requireAuth();
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoadingAuth]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedSortOption = localStorage.getItem('sortOption') as 'none' | 'peers' | 'seeders' | 'best' | null;
+      const savedSortOption = localStorage.getItem('sortOption') as DropdownOption['value'] | null;
       if (savedSortOption) {
         setSortOption(savedSortOption);
       }
     }
   }, []);
 
-  if (isLoading) {
+  if (isLoadingAuth) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='loading loading-spinner loading-lg'></div>
@@ -48,11 +49,11 @@ export default function Home() {
     if (searchQuery.trim() === '') {
       setSearchResults([]);
       setOriginalResults([]);
-      setLoading(false);
+      setIsLoading(false);
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
 
     try {
       const data = await api.searchInJackett(searchQuery);
@@ -62,11 +63,11 @@ export default function Home() {
     } catch (error) {
       console.error('Erro na busca:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const applySorting = (results: Movie[], option: 'none' | 'peers' | 'seeders' | 'best') => {
+  const applySorting = (results: Movie[], option: DropdownOption['value']) => {
     let sortedResults = [...results];
 
     if (option === 'peers') {
@@ -87,13 +88,8 @@ export default function Home() {
   const handleSortOption = (option: 'none' | 'peers' | 'seeders' | 'best') => {
     setSortOption(option);
 
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sortOption', option);
-    }
-
-    if (originalResults.length > 0) {
-      applySorting(originalResults, option);
-    }
+    if (typeof window !== 'undefined') localStorage.setItem('sortOption', option);
+    if (originalResults.length > 0) applySorting(originalResults, option);
   };
 
   return (
@@ -132,21 +128,47 @@ export default function Home() {
           </Button>
         </Fieldset>
 
-        <SortDropdown
-          sortOption={sortOption}
-          text='Ordenação:'
-          onSortChange={handleSortOption}
-        />
+        <div className='flex gap-4'>
+          <Dropdown
+            title='Ordenação:'
+            selectedValue={sortOption}
+          >
+            <Option
+              label='Padrão'
+              description='Nenhuma (sem ordenação)'
+              action={() => handleSortOption('none')}
+              value='none'
+            />
+            <Option
+              label='Peers ↓'
+              description='Peers (maior para menor)'
+              action={() => handleSortOption('peers')}
+              value='peers'
+            />
+            <Option
+              label='Seeders ↓'
+              description='Seeders (maior para menor)'
+              action={() => handleSortOption('seeders')}
+              value='seeders'
+            />
+            <Option
+              label='Combinado ⭐'
+              description='Combinação de peers e seeders'
+              action={() => handleSortOption('best')}
+              value='best'
+            />
+          </Dropdown>
+        </div>
       </section>
 
-      {searchResults.length > 0 && !loading && (
+      {searchResults.length > 0 && !isLoading && (
         <div className='w-full flex justify-between items-center ml-20 mt-10'>
           <div className='text-sm text-gray-500'>Encontrados: {searchResults.length}</div>
         </div>
       )}
 
       <section className='card flex-row justify-center m-10 mt-4 p-6 flex-wrap gap-4'>
-        {loading ? (
+        {isLoading ? (
           <div className='flex flex-col items-center animate-pulse'>
             <p className='mb-6 italic text-gray-500'>
               Infelizmente o tempo de procura pode demorar um pouco, então tenha paciência.
