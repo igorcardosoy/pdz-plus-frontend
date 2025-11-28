@@ -70,7 +70,7 @@ const Login = () => {
               <Button
                 type='button'
                 onClick={() => {
-                  authService.loginWithCallback('https://pdz-plus.localto.net/callback');
+                  authService.loginWithCallback('https://plus.pdz.li/callback');
                 }}
               >
                 <Image
