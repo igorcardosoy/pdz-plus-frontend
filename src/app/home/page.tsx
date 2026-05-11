@@ -7,13 +7,13 @@ import Fieldset from '@/components/Fieldset';
 import Input from '@/components/Input';
 import Option, { DropdownOption } from '@/components/Option';
 import { useAuth } from '@/hooks/useAuth';
-import { JackettApi, Movie } from '@/services/JackettService';
+import { Movie, MovieApi } from '@/services/MovieService';
 import { Magnet, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
   const { isAuthenticated, isLoading: isLoadingAuth, requireAuth } = useAuth();
-  let api = new JackettApi();
+  let api = new MovieApi();
   let [searchQuery, setSearchQuery] = useState('');
   let [searchResults, setSearchResults]: [Movie[], any] = useState([]);
   let [originalResults, setOriginalResults] = useState<Movie[]>([]);
@@ -56,7 +56,7 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const data = await api.searchInJackett(searchQuery);
+      const data = await api.search(searchQuery);
 
       setOriginalResults(data.Results);
       applySorting(data.Results, sortOption);
