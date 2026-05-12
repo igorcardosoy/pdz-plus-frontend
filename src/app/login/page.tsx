@@ -38,7 +38,7 @@ const Login = () => {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-base-200'>
+    <div className='min-h-screen flex items-center justify-center bg-base-200 p-5'>
       <div className='card w-96 bg-base-100 shadow-xl'>
         <div className='card-body'>
           <h2 className='card-title justify-center m-6'>PDZ+</h2>
@@ -69,6 +69,7 @@ const Login = () => {
             <div className='card-actions justify-end mt-4'>
               <Button
                 type='button'
+                className='btn-outline'
                 onClick={() => {
                   authService.loginWithCallback('https://plus.pdz.li/callback');
                 }}
