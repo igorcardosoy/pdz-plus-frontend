@@ -7,6 +7,7 @@ export interface SearchResponse {
 
 export interface Movie {
   Title: string;
+  Providers?: string[];
   Description?: string;
   Link: string;
   Size: number;

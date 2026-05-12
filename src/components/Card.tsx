@@ -3,6 +3,7 @@ interface CardProps {
   description?: string;
   seeders?: number;
   peers?: number;
+  providers?: string[];
   buttonText?: React.ReactNode;
   category?: string;
   categories?: string[];
@@ -14,7 +15,7 @@ interface CardProps {
   buttonSize?: 'sm' | 'md';
 }
 
-const Card = ({ title, description, seeders, peers, buttonText, link, category, categories, tracker, onButtonClick, showDeleteButton, onDeleteClick, buttonSize = 'md' }: CardProps) => {
+const Card = ({ title, description, seeders, peers, providers, buttonText, link, category, categories, tracker, onButtonClick, showDeleteButton, onDeleteClick, buttonSize = 'md' }: CardProps) => {
   let seedLevels = [
     { label: 'Muito Baixo', value: 0, className: 'badge badge-soft badge-info' },
     { label: 'Baixo', value: 1, className: 'badge badge-soft badge-info' },
@@ -64,8 +65,16 @@ const Card = ({ title, description, seeders, peers, buttonText, link, category, 
         )}
 
         {description && <p>{description}</p>}
-        <div className='card-actions items-center justify-between w-full mt-auto'>
-          {tracker && <div className='text-xs text-gray-500 w-fit shrink-0'>{tracker}</div>}
+        <div className='card-actions items-end justify-between w-full mt-auto gap-3'>
+          <div className='flex flex-col gap-1 min-w-0'>
+            {(providers && providers.length > 0) ? (
+              <div className='text-xs text-gray-500 w-fit shrink-0 break-words'>
+                {providers.join(', ')}
+              </div>
+            ) : (
+              tracker && <div className='text-xs text-gray-500 w-fit shrink-0'>{tracker}</div>
+            )}
+          </div>
 
           <div className='flex gap-2 justify-end'>
             {showDeleteButton && (

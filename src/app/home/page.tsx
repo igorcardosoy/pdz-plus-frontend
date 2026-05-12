@@ -237,6 +237,7 @@ export default function Home() {
               <Card
                 key={index}
                 title={result.Title}
+                providers={result.Providers}
                 seeders={result.Seeders}
                 peers={result.Peers}
                 buttonText={

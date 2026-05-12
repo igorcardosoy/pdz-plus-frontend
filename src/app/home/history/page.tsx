@@ -103,6 +103,7 @@ export default function HistoryPage() {
               <div key={item.id} className='relative'>
                 <Card
                   title={item.movie.Title}
+                  providers={item.movie.Providers}
                   description={item.movie.Description}
                   seeders={item.movie.Seeders}
                   peers={item.movie.Peers}
