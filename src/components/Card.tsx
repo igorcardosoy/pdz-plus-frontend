@@ -15,25 +15,7 @@ interface CardProps {
   buttonSize?: 'sm' | 'md';
 }
 
-const Card = ({ title, description, seeders, peers, providers, buttonText, link, category, categories, tracker, onButtonClick, showDeleteButton, onDeleteClick, buttonSize = 'md' }: CardProps) => {
-  let seedLevels = [
-    { label: 'Muito Baixo', value: 0, className: 'badge badge-soft badge-info' },
-    { label: 'Baixo', value: 1, className: 'badge badge-soft badge-info' },
-    { label: 'Médio', value: 2, className: 'badge badge-soft badge-info' },
-    { label: 'Alto', value: 3, className: 'badge badge-soft badge-info' },
-    { label: 'Muito Alto', value: 4, className: 'badge badge-soft badge-info' },
-  ];
-
-  let seedLevel = 0;
-  let peersLevel = 0;
-  if (seeders && seeders > 0) {
-    seedLevel = Math.min(Math.floor(seeders / 20), seedLevels.length - 1);
-  }
-
-  if (peers && peers > 0) {
-    peersLevel = Math.min(Math.floor(peers / 20), seedLevels.length - 1);
-  }
-
+const Card = ({ title, description, providers, buttonText, link, category, categories, tracker, onButtonClick, showDeleteButton, onDeleteClick, buttonSize = 'md' }: CardProps) => {
   return (
     <div className={`card bg-base-200 shadow-sm h-64 md:w-96 w-full max-w-sm`}>
       <div className='card-body justify-between'>
@@ -41,12 +23,7 @@ const Card = ({ title, description, seeders, peers, providers, buttonText, link,
           className='tooltip'
           data-tip={title}
         >
-          <h2 className='card-title line-clamp-2 overflow-hidden text-ellipsis break-words'>{title}</h2>
-        </div>
-
-        <div className='card-actions'>
-          {<div className={seedLevels[seedLevel].className}>Seeders: {seeders ? seeders : 0}</div>}
-          {<div className={seedLevels[peersLevel].className}>Peers: {peers ? peers : 0}</div>}
+          <h2 className='card-title line-clamp-4 overflow-hidden text-ellipsis break-words'>{title}</h2>
         </div>
 
         {category && <div className='badge badge-soft badge-secondary'>{category}</div>}

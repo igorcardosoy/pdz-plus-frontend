@@ -105,8 +105,6 @@ export default function HistoryPage() {
                   title={item.movie.Title}
                   providers={item.movie.Providers}
                   description={item.movie.Description}
-                  seeders={item.movie.Seeders}
-                  peers={item.movie.Peers}
                   buttonText={
                     <>
                       <Magnet width={16} /> Baixar Novamente

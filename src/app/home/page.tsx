@@ -238,8 +238,6 @@ export default function Home() {
                 key={index}
                 title={result.Title}
                 providers={result.Providers}
-                seeders={result.Seeders}
-                peers={result.Peers}
                 buttonText={
                   <>
                     <Magnet width={16} /> Baixar
