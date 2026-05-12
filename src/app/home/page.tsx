@@ -120,6 +120,18 @@ export default function Home() {
     }
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setOriginalResults([]);
+    setIsLoading(false);
+
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('searchQuery');
+      sessionStorage.removeItem('originalResults');
+    }
+  };
+
   const handleSortOption = (option: 'none' | 'peers' | 'seeders' | 'best') => {
     setSortOption(option);
 
@@ -156,6 +168,8 @@ export default function Home() {
             className='join-item input-neutral'
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
+            clearable
+            onClear={handleClearSearch}
             onKeyDown={e => {
               if (e.key === 'Enter') {
                 handleSearch();
