@@ -2,6 +2,7 @@
 
 import { authService } from '@/services/AuthService';
 import { UserProfile, userService } from '@/services/UserService';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -45,7 +46,7 @@ const Navbar = () => {
   return (
     <div className='navbar bg-base-200 shadow-sm'>
       <div className='navbar-start'>
-        <div className='dropdown'>
+        {/* <div className='dropdown'>
           <div
             tabIndex={0}
             role='button'
@@ -72,10 +73,17 @@ const Navbar = () => {
             className='menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow'
           >
             <li>
-              <a>Nada por aqui no momento</a>
+              <a >Nada aqui</a>
             </li>
           </ul>
-        </div>
+        </div> */}
+        <ul>
+          <li>
+            <Link
+            className='ml-3 btn btn-outline text-lg font-medium'
+            href='/home/history'>Histórico</Link>
+          </li>
+        </ul>
       </div>
       <div className='navbar-center'>
         <a

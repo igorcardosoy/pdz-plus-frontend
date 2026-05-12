@@ -7,6 +7,7 @@ import Fieldset from '@/components/Fieldset';
 import Input from '@/components/Input';
 import Option, { DropdownOption } from '@/components/Option';
 import { useAuth } from '@/hooks/useAuth';
+import { historyService } from '@/services/HistoryService';
 import { Movie, MovieApi } from '@/services/MovieService';
 import { Magnet, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -24,14 +25,67 @@ export default function Home() {
     requireAuth();
   }, [isAuthenticated, isLoadingAuth]);
 
+  const applySorting = (results: Movie[], option: DropdownOption['value']) => {
+    let sortedResults = [...results];
+
+    if (option === 'peers') {
+      sortedResults.sort((a, b) => b.Peers - a.Peers);
+    } else if (option === 'seeders') {
+      sortedResults.sort((a, b) => b.Seeders - a.Seeders);
+    } else if (option === 'best') {
+      sortedResults.sort((a, b) => {
+        const scoreA = a.Peers * 0.6 + a.Seeders * 0.4;
+        const scoreB = b.Peers * 0.6 + b.Seeders * 0.4;
+        return scoreB - scoreA;
+      });
+    }
+
+    setSearchResults(sortedResults);
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedSortOption = localStorage.getItem('sortOption') as DropdownOption['value'] | null;
       if (savedSortOption) {
         setSortOption(savedSortOption);
       }
+
+      const savedQuery = sessionStorage.getItem('searchQuery');
+      const savedResults = sessionStorage.getItem('originalResults');
+      
+      if (savedQuery) {
+        setSearchQuery(savedQuery);
+      }
+      
+      if (savedResults) {
+        try {
+          const parsedResults = JSON.parse(savedResults);
+          setOriginalResults(parsedResults);
+          applySorting(parsedResults, savedSortOption || 'none');
+        } catch (e) {
+          console.error('Erro ao recuperar resultados do sessionStorage', e);
+        }
+      }
     }
   }, []);
+
+  useEffect(() => {
+    if (originalResults.length > 0) {
+      applySorting(originalResults, sortOption);
+    }
+  }, [originalResults, sortOption]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('searchQuery', searchQuery);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('originalResults', JSON.stringify(originalResults));
+    }
+  }, [originalResults]);
 
   if (isLoadingAuth) {
     return (
@@ -59,7 +113,6 @@ export default function Home() {
       const data = await api.search(searchQuery);
 
       setOriginalResults(data.Results);
-      applySorting(data.Results, sortOption);
     } catch (error) {
       console.error('Erro na busca:', error);
     } finally {
@@ -67,29 +120,18 @@ export default function Home() {
     }
   };
 
-  const applySorting = (results: Movie[], option: DropdownOption['value']) => {
-    let sortedResults = [...results];
-
-    if (option === 'peers') {
-      sortedResults.sort((a, b) => b.Peers - a.Peers);
-    } else if (option === 'seeders') {
-      sortedResults.sort((a, b) => b.Seeders - a.Seeders);
-    } else if (option === 'best') {
-      sortedResults.sort((a, b) => {
-        const scoreA = a.Peers * 0.6 + a.Seeders * 0.4;
-        const scoreB = b.Peers * 0.6 + b.Seeders * 0.4;
-        return scoreB - scoreA;
-      });
-    }
-
-    setSearchResults(sortedResults);
-  };
-
   const handleSortOption = (option: 'none' | 'peers' | 'seeders' | 'best') => {
     setSortOption(option);
 
     if (typeof window !== 'undefined') localStorage.setItem('sortOption', option);
-    if (originalResults.length > 0) applySorting(originalResults, option);
+  };
+
+  const handleDownload = async (movie: Movie) => {
+    try {
+      await historyService.addToHistory(movie);
+    } catch (error) {
+      console.error('Erro ao adicionar ao histórico:', error);
+    }
   };
 
   return (
@@ -170,7 +212,7 @@ export default function Home() {
       <section className='card flex-row justify-center m-10 mt-4 p-6 flex-wrap gap-4'>
         {isLoading ? (
           <div className='flex flex-col items-center animate-pulse'>
-            <p className='mb-6 italic text-gray-500'>
+            <p className='mb-6 italic text-gray-500 text-center'>
               Infelizmente o tempo de procura pode demorar um pouco, então tenha paciência.
             </p>
             <span className='loading loading-ring loading-xl'></span>
@@ -190,6 +232,7 @@ export default function Home() {
                 }
                 tracker={result.Tracker}
                 link={result.MagnetUri || result.Link}
+                onButtonClick={() => handleDownload(result)}
               />
             ))}
           </>
