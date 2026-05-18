@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { authService } from './AuthService';
+import { apiGet } from './api-client';
 
 export interface SearchResponse {
   Results: Array<Movie>;
@@ -23,32 +22,17 @@ export interface Movie {
 }
 
 export class MovieApi {
-  private axios;
-  private authService = authService;
-
-  constructor() {
-    this.axios = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_PDZ_API_URL,
-      headers: {
-        'Authorization': `Bearer ${this.authService.getToken()}`,
-      },
-    });
-  }
-
   async search(query: string, limit: number = 10): Promise<SearchResponse> {
     try {
-      const response = await this.axios.get(`/pdz-api/movies/search`, {
-        params: {
-          query: query,
-          limit: limit,
-        },
-      });
-      const data = response.data;
-
-      return data as SearchResponse;
+      // Requisição via proxy autenticado Next.js
+      const path = `/pdz-api/movies/search?query=${encodeURIComponent(query)}&limit=${limit}`;
+      const data = await apiGet<SearchResponse>(path);
+      return data;
     } catch (error) {
       console.error('Error searching movies:', error);
       throw error;
     }
   }
 }
+
+export const movieService = new MovieApi();

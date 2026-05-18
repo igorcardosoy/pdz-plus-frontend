@@ -6,24 +6,18 @@ import Dropdown from '@/components/Dropdown';
 import Fieldset from '@/components/Fieldset';
 import Input from '@/components/Input';
 import Option, { DropdownOption } from '@/components/Option';
-import { useAuth } from '@/hooks/useAuth';
 import { historyService } from '@/services/HistoryService';
 import { Movie, MovieApi } from '@/services/MovieService';
 import { Magnet, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
-  const { isAuthenticated, isLoading: isLoadingAuth, requireAuth } = useAuth();
   let api = new MovieApi();
   let [searchQuery, setSearchQuery] = useState('');
   let [searchResults, setSearchResults]: [Movie[], any] = useState([]);
   let [originalResults, setOriginalResults] = useState<Movie[]>([]);
   let [isLoading, setIsLoading] = useState(false);
   let [sortOption, setSortOption] = useState<DropdownOption['value']>('none');
-
-  useEffect(() => {
-    requireAuth();
-  }, [isAuthenticated, isLoadingAuth]);
 
   const applySorting = (results: Movie[], option: DropdownOption['value']) => {
     let sortedResults = [...results];
@@ -86,18 +80,6 @@ export default function Home() {
       sessionStorage.setItem('originalResults', JSON.stringify(originalResults));
     }
   }, [originalResults]);
-
-  if (isLoadingAuth) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='loading loading-spinner loading-lg'></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   const handleSearch = async () => {
     if (searchQuery.trim() === '') {
