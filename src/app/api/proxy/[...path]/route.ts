@@ -8,6 +8,7 @@
 
 import { logtoConfig } from '@/app/logto';
 import { getAccessToken, getLogtoContext } from '@logto/next/server-actions';
+import { CookieStorage, PersistKey } from '@logto/node';
 import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_PDZ_API_URL || 'http://localhost:8080';
@@ -39,15 +40,33 @@ async function proxyRequest(request: NextRequest, method: string) {
       );
     }
 
-    const accessToken = await getAccessToken(logtoConfig, 
-      process.env.LOGTO_API_INDICATOR || 'https://backend.pdz.li'
-    );
+    const resourceIndicator = process.env.LOGTO_API_INDICATOR || '';
+    let accessToken: string | null = null;
+    let tokenSource: 'access_token' | 'id_token' = 'access_token';
 
-    if (!accessToken) {
-      return NextResponse.json(
-        { error: 'No access token available' },
-        { status: 401 }
-      );
+    if (resourceIndicator) {
+      try {
+        accessToken = await getAccessToken(logtoConfig, resourceIndicator);
+      } catch (err) {
+        console.warn('Failed to get access token with resource indicator:', String(err));
+      }
+    }
+
+    if (!accessToken || accessToken.split('.').length !== 3) {
+      const idToken = await getIdTokenFromRequest(request);
+
+      if (!idToken) {
+        return NextResponse.json(
+          {
+            error: 'No JWT available',
+            help: 'Configure a API Resource ou permita ID token para o backend.',
+          },
+          { status: 401 }
+        );
+      }
+
+      accessToken = idToken;
+      tokenSource = 'id_token';
     }
 
     const url = new URL(request.url);
@@ -68,13 +87,32 @@ async function proxyRequest(request: NextRequest, method: string) {
       body = await request.text();
     }
 
+    console.info('[proxy] backendUrl=%s tokenSource=%s', backendUrl, tokenSource);
+
     const response = await fetch(backendUrl, {
       method,
       headers,
       body,
     });
 
-    const data = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    const data = isJson ? await response.json() : await response.text();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          error: 'Backend request failed',
+          status: response.status,
+          backendUrl,
+          tokenSource,
+          tokenMeta: getJwtMeta(accessToken),
+          backendResponse: data,
+        },
+        { status: response.status }
+      );
+    }
+
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error('Proxy error:', error);
@@ -82,5 +120,53 @@ async function proxyRequest(request: NextRequest, method: string) {
       { error: 'Internal server error' },
       { status: 500 }
     );
+  }
+}
+
+async function getIdTokenFromRequest(request: NextRequest) {
+  const rawCookies = request.headers.get('cookie') || '';
+  const cookieList: Record<string, string> = {};
+
+  rawCookies.split(';').map(s => s.trim()).filter(Boolean).forEach(pair => {
+    const [k, ...rest] = pair.split('=');
+    if (!k) return;
+    const rawValue = rest.join('=') || '';
+    try {
+      cookieList[k] = decodeURIComponent(rawValue);
+    } catch {
+      cookieList[k] = rawValue;
+    }
+  });
+
+  const storage = new CookieStorage({
+    cookieKey: `logto_${logtoConfig.appId}`,
+    encryptionKey: logtoConfig.cookieSecret,
+    isSecure: logtoConfig.cookieSecure,
+    getCookie: (name) => cookieList[name],
+    setCookie: () => {},
+  });
+
+  await storage.init();
+  return storage.getItem(PersistKey.IdToken);
+}
+
+function getJwtMeta(token: string | null) {
+  if (!token) return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')
+    );
+
+    return {
+      aud: payload.aud,
+      iss: payload.iss,
+      sub: payload.sub,
+      exp: payload.exp,
+    };
+  } catch {
+    return null;
   }
 }

@@ -15,12 +15,8 @@ export async function apiGet<T>(path: string): Promise<T> {
       'Content-Type': 'application/json',
     },
   });
-  
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-  }
-  
-  return response.json();
+
+  return handleResponse<T>(response);
 }
 
 /**
@@ -34,12 +30,8 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-  }
-  
-  return response.json();
+
+  return handleResponse<T>(response);
 }
 
 /**
@@ -52,10 +44,19 @@ export async function apiDelete<T>(path: string): Promise<T> {
       'Content-Type': 'application/json',
     },
   });
-  
+
+  return handleResponse<T>(response);
+}
+
+async function handleResponse<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const payload = isJson ? await response.json() : await response.text();
+
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    const detail = typeof payload === 'string' ? payload : JSON.stringify(payload);
+    throw new Error(`API Error: ${response.status} ${response.statusText} - ${detail}`);
   }
-  
-  return response.json();
+
+  return payload as T;
 }

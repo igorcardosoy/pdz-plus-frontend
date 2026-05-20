@@ -1,14 +1,5 @@
 /** @type {import('next').NextConfig} */
-const nextConfig: import('next').NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:8080/pdz-api/:path*',
-      },
-    ];
-  },
-};
+const nextConfig: import('next').NextConfig = {};
 
 module.exports = nextConfig;
 

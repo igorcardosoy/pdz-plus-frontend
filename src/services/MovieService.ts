@@ -25,7 +25,7 @@ export class MovieApi {
   async search(query: string, limit: number = 10): Promise<SearchResponse> {
     try {
       // Requisição via proxy autenticado Next.js
-      const path = `/pdz-api/movies/search?query=${encodeURIComponent(query)}&limit=${limit}`;
+      const path = `/movies/search?query=${encodeURIComponent(query)}&limit=${limit}`;
       const data = await apiGet<SearchResponse>(path);
       return data;
     } catch (error) {
