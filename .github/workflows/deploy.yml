@@ -1,0 +1,55 @@
+name: Deploy PDZ Plus
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to deploy
+        required: true
+        default: main
+        type: string
+
+jobs:
+  deploy:
+    environment: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          port: ${{ vars.SERVER_PORT }}
+          username: ${{ vars.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd "${{ vars.SERVER_APP_PATH }}"
+            git fetch origin "${{ inputs.branch }}"
+            if git show-ref --verify --quiet "refs/heads/${{ inputs.branch }}"; then
+              git switch "${{ inputs.branch }}"
+            else
+              git switch -c "${{ inputs.branch }}" --track "origin/${{ inputs.branch }}"
+            fi
+            git pull origin "${{ inputs.branch }}"
+
+            cat > .env.local <<EOF
+            NEXT_PUBLIC_PDZ_API_URL=${{ vars.NEXT_PUBLIC_PDZ_API_URL }}
+            LOGTO_ENDPOINT=${{ vars.LOGTO_ENDPOINT }}
+            LOGTO_APP_ID=${{ vars.LOGTO_APP_ID }}
+            LOGTO_SCOPES=${{ vars.LOGTO_SCOPES }}
+            LOGTO_APP_SECRET=${{ vars.LOGTO_APP_SECRET }}
+            LOGTO_BASE_URL=${{ vars.LOGTO_BASE_URL }}
+            LOGTO_COOKIE_SECRET=${{ vars.LOGTO_COOKIE_SECRET }}
+            LOGTO_RESOURCES=${{ vars.LOGTO_RESOURCES }}
+            LOGTO_API_INDICATOR=${{ vars.LOGTO_API_INDICATOR }}
+            EOF
+
+            npm ci
+            npm run build
+            systemctl restart "${{ vars.SERVER_SERVICE_NAME }}"
