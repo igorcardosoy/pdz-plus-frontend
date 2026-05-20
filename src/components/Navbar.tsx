@@ -1,15 +1,13 @@
 'use client';
 
-import { authService } from '@/services/AuthService';
-import { UserProfile, userService } from '@/services/UserService';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
-const Navbar = () => {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
+type NavbarProps = {
+  isAuthenticated: boolean;
+  claims: any;
+};
 
+const Navbar = ({ isAuthenticated, claims }: NavbarProps) => {
   const getPlaceholderImage = (username?: string) => {
     if (username) {
       const hash = btoa(username.toLowerCase()).slice(0, 32);
@@ -18,25 +16,8 @@ const Navbar = () => {
     return 'https://www.gravatar.com/avatar/?d=mp&s=40';
   };
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const userProfile = await userService.getUserProfile();
-        setUser(userProfile);
-
-        const pictureUrl = await userService.getProfilePictureUrl();
-        setProfilePictureUrl(pictureUrl);
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    };
-
-    loadUserData();
-  }, []);
-
   const handleLogout = () => {
-    authService.logout();
-    redirect('/login');
+    window.location.href = '/api/auth/signout';
   };
 
   const handleHomeClick = () => {
@@ -106,11 +87,11 @@ const Navbar = () => {
               <div className='w-10 rounded-full'>
                 <img
                   alt='Profile picture'
-                  src={profilePictureUrl || getPlaceholderImage(user?.username)}
+                  src={claims?.picture || getPlaceholderImage(claims?.username || claims?.name || claims?.sub)}
                   onError={e => {
                     const target = e.target as HTMLImageElement;
-                    if (target.src !== getPlaceholderImage(user?.username)) {
-                      target.src = getPlaceholderImage(user?.username);
+                    if (target.src !== getPlaceholderImage(claims?.username || claims?.name || claims?.sub)) {
+                      target.src = getPlaceholderImage(claims?.username || claims?.name || claims?.sub);
                     }
                   }}
                 />
@@ -125,9 +106,9 @@ const Navbar = () => {
               </li>
             </ul>
           </div>
-          {user && (
+          {isAuthenticated && claims && (
             <div className='navbar-user'>
-              <span className='font-bold'>{user.username}</span>
+              <span className='font-bold'>{claims.username || claims.name || claims.sub}</span>
             </div>
           )}
         </div>

@@ -1,25 +1,17 @@
 'use client';
 
 import Card from '@/components/Card';
-import { useAuth } from '@/hooks/useAuth';
 import { historyService, MovieHistoryDTO } from '@/services/HistoryService';
 import { Magnet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function HistoryPage() {
-  const { isAuthenticated, isLoading: isLoadingAuth, requireAuth } = useAuth();
   const [history, setHistory] = useState<MovieHistoryDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    requireAuth();
-  }, [isAuthenticated, isLoadingAuth]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
       loadHistory();
-    }
-  }, [isAuthenticated]);
+  }, []);
 
   const loadHistory = async () => {
     setIsLoading(true);
@@ -60,18 +52,6 @@ export default function HistoryPage() {
       minute: '2-digit',
     });
   };
-
-  if (isLoadingAuth) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='loading loading-spinner loading-lg'></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   return (
     <main className='flex flex-col items-center justify-start min-h-screen'>
