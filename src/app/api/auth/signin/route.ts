@@ -7,13 +7,7 @@ const parseCsv = (value?: string) =>
     : [];
 
 export async function GET() {
-  const scopes = parseCsv(process.env.LOGTO_SCOPES) || ['openid'];
-  const resources = parseCsv(process.env.LOGTO_RESOURCES);
-
-  await signIn(logtoConfig, {
-    redirectUri: `${logtoConfig.baseUrl}/callback`,
-    scopes: scopes.length ? scopes : ['openid'],
-    resources: resources.length ? resources : undefined,
-    includeReservedScopes: false,
-  });
+  // Use the redirectUri overload to match the library types
+  // scopes/resources are handled by Logto defaults or client configuration
+  await signIn(logtoConfig, `${logtoConfig.baseUrl}/callback`);
 }
